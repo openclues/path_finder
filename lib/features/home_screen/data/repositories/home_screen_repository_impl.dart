@@ -7,10 +7,9 @@ import 'package:path_finder/core/constants/strings/config_strings.dart';
 import 'package:path_finder/core/error/http_failure.dart';
 import 'package:path_finder/core/services/local_storage.dart';
 
-import 'package:path_finder/features/home_screen/data/models/grid_point_model.dart';
-
 import '../../../../core/services/http_service.dart';
 import '../../domain/repositories/home_screen_repository.dart';
+import '../models/path_finding_request.dart';
 
 class HomeScreenRepositoryImpl implements HomeScreenRepository {
   final HttpService _httpService;
@@ -23,7 +22,7 @@ class HomeScreenRepositoryImpl implements HomeScreenRepository {
         _sharedPreferencesService = sharedPreferencesService;
 
   @override
-  Future<Either<HttpFailure, BaseResponseModel<List<GridPointModel>>?>>
+  Future<Either<HttpFailure, BaseResponseModel<List<PathFindingRequest>>?>>
       getHomeScreenData(String? url) async {
     //validation
     String? validateUrl = Validators.validateUrl(url);
@@ -36,12 +35,12 @@ class HomeScreenRepositoryImpl implements HomeScreenRepository {
     await _sharedPreferencesService.setData(ConfigStrings.baseUrl, url);
 
     //make the request
-    return _httpService.get<BaseResponseModel<List<GridPointModel>>>(
+    return _httpService.get<BaseResponseModel<List<PathFindingRequest>>>(
       url: url!,
       fromJson: (decodedJson) => BaseResponseModel.fromJson(
         decodedJson,
         (json) =>
-            (json as List).map((e) => GridPointModel.fromJson(e)).toList(),
+            (json as List).map((e) => PathFindingRequest.fromJson(e)).toList(),
       ),
     );
   }

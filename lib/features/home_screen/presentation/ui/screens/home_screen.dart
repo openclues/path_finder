@@ -1,8 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:path_finder/core/common/validators.dart';
-import 'package:path_finder/core/constants/strings/app_strings.dart';
-import 'package:path_finder/features/home_screen/presentation/cubit/obtain_points_data_cubit.dart';
+
+import '../../../../../core/constants/strings/app_strings.dart';
+import '../../../../processing/presentation/ui/screens/visualize_the_grid.dart';
+import '../../cubit/obtain_points_data_cubit.dart';
+import '../widgets/custom_url_field.dart';
+import '../widgets/start_button.dart';
 
 class HomeScreen extends StatefulWidget {
   static const String routeName = '/';
@@ -16,32 +19,24 @@ class _HomeScreenState extends State<HomeScreen> {
   final _formKey = GlobalKey<FormState>();
   @override
   Widget build(BuildContext context) {
-    return BlocBuilder<ObtainPointsDataCubit, ObtainPointsDataState>(
+    return BlocConsumer<ObtainPointsDataCubit, ObtainPointsDataState>(
+      listener: (context, state) {
+        if (state is ObtainPointsDataLoaded) {
+          Navigator.of(context).pushNamed(VisualizeTheGrid.routeName,
+              arguments: state.gridPoints.first);
+        }
+      },
       builder: (context, state) {
         return Scaffold(
           floatingActionButtonLocation:
               FloatingActionButtonLocation.centerFloat,
-          floatingActionButton: Container(
-            margin: const EdgeInsets.symmetric(horizontal: 16.0),
-            width: double.infinity,
-            child: ElevatedButton(
-              style:
-                  ElevatedButton.styleFrom(backgroundColor: Colors.blue[300]),
-              onPressed: () {
-                if (_formKey.currentState!.validate()) {
-                  _formKey.currentState!.save();
-                }
-              },
-              child: Padding(
-                padding: const EdgeInsets.all(12.0),
-                child: Text(AppStrings.startCountingProcess,
-                    style:
-                        const TextStyle(fontSize: 16.0, color: Colors.black)),
-              ),
-            ),
-          ),
+          floatingActionButton: state is ObtainPointsDataLoading
+              ? const CircularProgressIndicator()
+              : StartButton(
+                  formKey: _formKey,
+                ),
           appBar: AppBar(
-            title: const Text('Home Screen'),
+            title: Text(AppStrings.homeScreen),
           ),
           body: Padding(
             padding: const EdgeInsets.symmetric(horizontal: 16.0),
@@ -52,23 +47,15 @@ class _HomeScreenState extends State<HomeScreen> {
                 children: [
                   Text(AppStrings.setAvalidUrlLinkToCotinue),
                   const SizedBox(height: 16.0),
-                  TextFormField(
-                    onSaved: (v) {
-                      context.read<ObtainPointsDataCubit>().getData(v);
-                    },
-                    validator: Validators.validateUrl,
-                    decoration: const InputDecoration(
-                      prefixIcon: Icon(Icons.link),
-                      hintText: 'Enter URL',
-                    ),
-                  ),
-                  if (state is ObtainPointsDataLoading)
-                    const Center(child: CircularProgressIndicator()),
+                  const CustomUrlTextField(),
                   if (state is ObtainPointsDataError)
-                    Center(
-                      child: Text(
-                        state.failure.message,
-                        style: const TextStyle(color: Colors.red),
+                    Padding(
+                      padding: const EdgeInsets.only(top: 16.0),
+                      child: Center(
+                        child: Text(
+                          state.failure.message,
+                          style: const TextStyle(color: Colors.red),
+                        ),
                       ),
                     ),
                 ],

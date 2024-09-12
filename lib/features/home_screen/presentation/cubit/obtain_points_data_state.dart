@@ -12,7 +12,7 @@ final class ObtainPointsDataInitial extends ObtainPointsDataState {}
 final class ObtainPointsDataLoading extends ObtainPointsDataState {}
 
 final class ObtainPointsDataLoaded extends ObtainPointsDataState {
-  final List<GridPointModel> gridPoints;
+  final List<PathFindingRequest> gridPoints;
 
   const ObtainPointsDataLoaded(this.gridPoints);
 

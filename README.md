@@ -8,4 +8,8 @@ Steps :
 
 - Creating directories, general elements, common services.
 
-- home screen states , url error, url empty ( initial state ) , loading data, data was loaded ( Send to proccessing screen )
+- Home Screen, validation, cubit, getting data, models.
+
+- Visualizing the data comming in a grid to understand the problem.
+
+- Proccessing Screen with initial cubit.

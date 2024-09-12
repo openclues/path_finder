@@ -36,6 +36,7 @@ class HttpServiceImpl implements HttpService {
       return _handleResponse(
           response.statusCode, response.body, fromJson, urlParsed);
     } catch (error) {
+      print('error: $error');
       return handleException(error);
     }
   }
