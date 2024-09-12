@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:path_finder/features/home_screen/presentation/cubit/home_scree_cubit.dart';
 
 import '../../../../../core/common/validators.dart';
-import '../../cubit/obtain_points_data_cubit.dart';
 
 class CustomUrlTextField extends StatelessWidget {
   const CustomUrlTextField({
@@ -13,7 +13,7 @@ class CustomUrlTextField extends StatelessWidget {
   Widget build(BuildContext context) {
     return TextFormField(
       onSaved: (v) {
-        context.read<ObtainPointsDataCubit>().getData(v);
+        context.read<HomeScreeCubit>().saveUrlForProcessing(v!);
       },
       validator: Validators.validateUrl,
       decoration: const InputDecoration(

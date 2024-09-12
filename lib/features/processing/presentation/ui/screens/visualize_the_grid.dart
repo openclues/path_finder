@@ -1,80 +1,91 @@
 import 'package:flutter/material.dart';
-import 'package:path_finder/features/home_screen/data/models/cell_model.dart';
-import 'package:path_finder/features/home_screen/data/models/path_finding_request.dart';
+import 'package:path_finder/features/processing/data/models/shortest_path_result.dart';
+import 'package:path_finder/features/home_screen/data/models/position_model.dart';
+import 'cell_helper.dart'; // Import the cell helper
+import 'grid_helper.dart'; // Import the grid helper
 
 class VisualizeTheGrid extends StatefulWidget {
   static const String routeName = '/visualize_the_grid';
-  final PathFindingRequest pathFindingRequest; // Make this non-nullable
+  final ShortestPathResult shortestPathResult;
 
-  const VisualizeTheGrid({super.key, required this.pathFindingRequest});
+  const VisualizeTheGrid({super.key, required this.shortestPathResult});
 
   @override
   State<VisualizeTheGrid> createState() => _VisualizeTheGridState();
 }
 
 class _VisualizeTheGridState extends State<VisualizeTheGrid> {
-  Color startColor = const Color(0xff64FFDA);
-  Color endColor = const Color(0xff009688);
-  Color obstacleColor = const Color(0xff000000);
-  Color emptyColor = const Color(0xffffffff);
+  late final List<Position> shortestPath;
 
-  cellColor(int row, int col) {
-    int startCol = widget.pathFindingRequest.start.x;
-    int startRow = widget.pathFindingRequest.start.y;
+  // Define colors for various cell states
 
-    int endCol = widget.pathFindingRequest.end.x;
-    int endRow = widget.pathFindingRequest.end.y;
-
-    // Get the cell value
-    Cell cellValue = widget.pathFindingRequest.grid.cells[row][col];
-
-    if (row == startRow && col == startCol) {
-      return startColor;
-    } else if (row == endRow && col == endCol) {
-      return endColor;
-    } else if (cellValue.type == CellType.obstacle) {
-      return obstacleColor;
-    } else {
-      return emptyColor;
-    }
+  @override
+  void initState() {
+    super.initState();
+    shortestPath = widget.shortestPathResult.steps
+        .map((e) => Position(x: e.x, y: e.y))
+        .toList();
   }
 
   @override
   Widget build(BuildContext context) {
-    // Extract the grid from the request
-    final grid = widget.pathFindingRequest.grid;
+    final grid = widget.shortestPathResult.grid;
 
     return Scaffold(
       appBar: AppBar(
         title: const Text('Visualize the Grid'),
       ),
-      body: Center(
-        child: GridView.builder(
-          gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
-            crossAxisCount: grid.cells[0].length, // Number of columns
-          ),
-          itemBuilder: (context, index) {
-            // Calculate the row and column from the index
-            int row = index ~/ grid.cells[0].length;
-            int col = index % grid.cells[0].length;
+      body: Column(
+        children: [
+          Expanded(
+            child: GridView.builder(
+              gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+                crossAxisCount: grid.width,
+              ),
+              itemBuilder: (context, index) {
+                int row = GridHelper.getRowIndex(index, grid);
+                int col = GridHelper.getColIndex(index, grid);
 
-            // Return a container for each cell
-            return Container(
-              decoration: BoxDecoration(
-                border: Border.all(color: Colors.grey),
-                color: cellColor(row, col),
-              ),
-              child: Center(
-                child: Text(
-                  '($col, $row)', // Display the position of the cell
-                  style: const TextStyle(fontSize: 14, color: Colors.white),
-                ),
-              ),
-            );
-          },
-          itemCount: grid.cells.length * grid.cells[0].length,
+                final Color containerColor = CellHelper.getCellColor(
+                  row: row,
+                  col: col,
+                  shortestPath: shortestPath,
+                  shortestPathResult: widget.shortestPathResult,
+                );
+
+                return _buildGridCell(row, col, containerColor);
+              },
+              itemCount: GridHelper.calculateItemCount(grid),
+            ),
+          ),
+          Expanded(
+              child: Text(widget.shortestPathResult.path,
+                  style: const TextStyle(
+                      fontSize: 16, fontWeight: FontWeight.bold),
+                  textAlign: TextAlign.center)),
+        ],
+      ),
+    );
+  }
+
+  // Build the individual grid cell
+  Widget _buildGridCell(int row, int col, Color containerColor) {
+    return Container(
+      decoration: BoxDecoration(
+        border: Border.all(color: Colors.grey),
+        color: containerColor,
+      ),
+      child: Center(
+        child: Text(
+          '($col, $row)',
+          style: TextStyle(
+            fontSize: 14,
+            color: containerColor == Colors.black ? Colors.white : Colors.black,
+          ),
         ),
       ),
     );
   }
+
+  // Build the bottom bar with the shortest path and actions
 }

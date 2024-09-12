@@ -12,12 +12,12 @@ final class ObtainPointsDataInitial extends ObtainPointsDataState {}
 final class ObtainPointsDataLoading extends ObtainPointsDataState {}
 
 final class ObtainPointsDataLoaded extends ObtainPointsDataState {
-  final List<PathFindingRequest> gridPoints;
+  final List<PathFindingRequest> pathFindingRequests;
 
-  const ObtainPointsDataLoaded(this.gridPoints);
+  const ObtainPointsDataLoaded(this.pathFindingRequests);
 
   @override
-  List<Object> get props => [gridPoints];
+  List<Object> get props => [pathFindingRequests];
 }
 
 final class ObtainPointsDataError extends ObtainPointsDataState {

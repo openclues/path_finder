@@ -1,21 +1,20 @@
 import 'package:dartz/dartz.dart';
 
 import 'package:path_finder/core/common/models/base_responst_model.dart';
-import 'package:path_finder/core/common/validators.dart';
 import 'package:path_finder/core/constants/strings/config_strings.dart';
 
 import 'package:path_finder/core/error/http_failure.dart';
 import 'package:path_finder/core/services/local_storage.dart';
 
 import '../../../../core/services/http_service.dart';
-import '../../domain/repositories/home_screen_repository.dart';
-import '../models/path_finding_request.dart';
+import '../../../home_screen/data/models/path_finding_request.dart';
+import '../../domain/repositories/obtain_data_repository.dart';
 
-class HomeScreenRepositoryImpl implements HomeScreenRepository {
+class ObtainDataRepositoryImpl implements ObtainDataRepository {
   final HttpService _httpService;
   final SharedPreferencesService _sharedPreferencesService;
 
-  HomeScreenRepositoryImpl(
+  ObtainDataRepositoryImpl(
       {required HttpService httpService,
       required SharedPreferencesService sharedPreferencesService})
       : _httpService = httpService,
@@ -23,20 +22,16 @@ class HomeScreenRepositoryImpl implements HomeScreenRepository {
 
   @override
   Future<Either<HttpFailure, BaseResponseModel<List<PathFindingRequest>>?>>
-      getHomeScreenData(String? url) async {
-    //validation
-    String? validateUrl = Validators.validateUrl(url);
-    if (validateUrl != null) {
-      //Invalid url
-      return Left(InternalAppHttpFailure(validateUrl, code: 400));
+      obtainData() async {
+    //get url
+    String? url = _sharedPreferencesService.getData(ConfigStrings.baseUrl);
+    if (url == null) {
+      return const Left(InternalAppHttpFailure('No url found'));
     }
-
-    //save url
-    await _sharedPreferencesService.setData(ConfigStrings.baseUrl, url);
 
     //make the request
     return _httpService.get<BaseResponseModel<List<PathFindingRequest>>>(
-      url: url!,
+      url: url,
       fromJson: (decodedJson) => BaseResponseModel.fromJson(
         decodedJson,
         (json) =>

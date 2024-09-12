@@ -1,21 +1,34 @@
 part of 'process_cubit.dart';
 
-sealed class ProcessState extends Equatable {
-  const ProcessState();
+final class ProcessProgress extends Equatable {
+  final int? completed;
+  final int? total;
+  final List<ShortestPathResult>? path;
+  final String? error;
+  final bool? sendingToServer;
+
+  const ProcessProgress(
+      {this.completed = 0,
+      this.total = 0,
+      this.path = const [],
+      this.error,
+      this.sendingToServer = false});
 
   @override
-  List<Object> get props => [];
-}
+  List<Object> get props => [completed!, total!, path!, sendingToServer!];
 
-final class ProcessInitial extends ProcessState {}
-
-final class ProcessLoading extends ProcessState {}
-
-final class ProcessLoaded extends ProcessState {
-  final List<Position> path;
-
-  const ProcessLoaded({required this.path});
-
-  @override
-  List<Object> get props => [path];
+  //copyWith method
+  ProcessProgress copyWith({
+    final int? completed,
+    final int? total,
+    final List<ShortestPathResult>? path,
+    final String? error,
+    final bool? sendingToServer,
+  }) {
+    return ProcessProgress(
+      completed: completed ?? this.completed,
+      path: path ?? this.path,
+      total: total ?? this.total,
+    );
+  }
 }
