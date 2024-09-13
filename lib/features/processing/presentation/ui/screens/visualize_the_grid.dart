@@ -1,20 +1,21 @@
 import 'package:flutter/material.dart';
+import 'package:path_finder/core/constants/strings/app_strings.dart';
 import 'package:path_finder/features/processing/data/models/shortest_path_result.dart';
-import 'package:path_finder/features/home_screen/data/models/position_model.dart';
+import 'package:path_finder/features/processing/data/models/position_model.dart';
 import 'cell_helper.dart'; // Import the cell helper
 import 'grid_helper.dart'; // Import the grid helper
 
-class VisualizeTheGrid extends StatefulWidget {
+class PreviewScreen extends StatefulWidget {
   static const String routeName = '/visualize_the_grid';
   final ShortestPathResult shortestPathResult;
 
-  const VisualizeTheGrid({super.key, required this.shortestPathResult});
+  const PreviewScreen({super.key, required this.shortestPathResult});
 
   @override
-  State<VisualizeTheGrid> createState() => _VisualizeTheGridState();
+  State<PreviewScreen> createState() => _PreviewScreenState();
 }
 
-class _VisualizeTheGridState extends State<VisualizeTheGrid> {
+class _PreviewScreenState extends State<PreviewScreen> {
   late final List<Position> shortestPath;
 
   // Define colors for various cell states
@@ -33,7 +34,7 @@ class _VisualizeTheGridState extends State<VisualizeTheGrid> {
 
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Visualize the Grid'),
+        title: Text(AppStrings.previewScreen),
       ),
       body: Column(
         children: [

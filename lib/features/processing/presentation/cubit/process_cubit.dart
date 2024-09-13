@@ -1,47 +1,92 @@
 import 'package:bloc/bloc.dart';
-import 'package:equatable/equatable.dart';
 import 'package:path_finder/features/processing/data/models/shortest_path_result.dart';
-import 'package:path_finder/features/home_screen/data/models/path_finding_request.dart';
-import '../../../../core/services/path_finder_service.dart';
-import '../../domain/mappers/path_result_mapper.dart';
+import 'package:path_finder/features/processing/domain/use_cases/calculate_the_shortest_path_use_case.dart';
+import 'package:path_finder/features/processing/domain/use_cases/get_data_use_case.dart';
+import 'package:path_finder/features/processing/domain/use_cases/send_data_use_case.dart';
 
-part 'process_state.dart';
+import 'process_state.dart';
 
-class ProcessCubit extends Cubit<ProcessProgress> {
-  final PathFindingService pathFindingService;
-  final PathResultMapper pathResultMapper;
+class ProcessCubit extends Cubit<ProcessState> {
+  final GetDataUseCase getDataUseCase;
+  final SendDataUseCase sendDataUseCase;
+  final CalculateTheShortestPathUseCase calculateTheShortestPathUseCase;
 
-  ProcessCubit(this.pathFindingService, this.pathResultMapper)
-      : super(const ProcessProgress());
+  ProcessCubit(
+    this.getDataUseCase,
+    this.calculateTheShortestPathUseCase,
+    this.sendDataUseCase,
+  ) : super(ProcessInitial());
 
-  Future<void> findShortestPath(
-      List<PathFindingRequest> pathFindingRequests) async {
-    emit(ProcessProgress(
-      completed: 0,
-      total: pathFindingRequests.length + 1,
-      path: const [],
-    ));
+  Future<void> executeProcess() async {
+    emit(ObtainPointsDataLoading());
 
-    List<ShortestPathResult> paths = [];
+    final result = await getDataUseCase.call();
+    result.fold(
+      (failure) => emit(ObtainPointsDataError(failure.message)),
+      (data) async {
+        emit(ObtainPointsDataLoaded(data!.data));
+        try {
+          emit(ProcessProgress(
+            completed: 0,
+            total: data.data.length,
+            path: const [],
+          ));
 
-    for (var request in pathFindingRequests) {
-      final path = pathFindingService.findPath(request);
+          List<ShortestPathResult> shortestPathResult =
+              await calculateTheShortestPathUseCase.call(
+            pathFindingRequests: data.data,
+            onProgress: (completed, total) {
+              emit(ProcessProgress(
+                completed: completed,
+                total: total,
+                path: (state as ProcessProgress).path,
+              ));
+            },
+            onError: (error) {
+              emit(ProcessProgress(
+                completed: (state as ProcessProgress).completed,
+                total: (state as ProcessProgress).total,
+                path: (state as ProcessProgress).path,
+                error: error,
+              ));
+            },
+          );
 
-      emit(ProcessProgress(
-        completed: paths.length + 1,
-        total: pathFindingRequests.length,
-      ));
+          // Final state when the process is completed
+          emit(ProcessProgress(
+            completed: data.data.length,
+            total: data.data.length,
+            path: shortestPathResult,
+          ));
+        } catch (e) {
+          emit(ProcessProgress(
+            completed: 0,
+            total: data.data.length,
+            path: const [],
+            error: e.toString(),
+          ));
+        }
+      },
+    );
+  }
 
-      final shortestPathResult = pathResultMapper.mapToShortestPathResult(
-          request.id, path, request.grid);
-
-      paths.add(shortestPathResult);
-
-      emit(ProcessProgress(
-        completed: paths.length,
-        total: pathFindingRequests.length,
-        path: paths,
-      ));
+  Future<void> sendDataToServer() async {
+    final currentState = state;
+    List<ShortestPathResult>? path;
+    if (currentState is SendDataError && currentState.path.isNotEmpty) {
+      path = currentState.path; // Use the path from SendDataError
+    } else if (currentState is ProcessProgress &&
+        currentState.path.isNotEmpty) {
+      path = currentState.path; // Use the path from ProcessProgress
+    } else {
+      emit(const SendDataError('No data to send.', []));
+      return;
     }
+    emit(SendDataLoading());
+    final result = await sendDataUseCase.call(path);
+    result.fold(
+      (failure) => emit(SendDataError(failure.message, path!)),
+      (data) => emit(SendDataSuccess(path!)),
+    );
   }
 }

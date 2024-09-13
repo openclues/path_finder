@@ -1,5 +1,5 @@
 // grid_helper.dart
-import 'package:path_finder/features/home_screen/data/models/grid_model.dart';
+import 'package:path_finder/features/processing/data/models/grid_model.dart';
 
 class GridHelper {
   static int calculateItemCount(Grid grid) {

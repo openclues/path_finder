@@ -1,5 +1,5 @@
 import 'package:equatable/equatable.dart';
-import 'package:path_finder/features/home_screen/data/models/grid_model.dart';
+import 'package:path_finder/features/processing/data/models/grid_model.dart';
 
 import 'step_model.dart';
 

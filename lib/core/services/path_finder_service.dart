@@ -1,7 +1,7 @@
 import 'dart:collection';
-import 'package:path_finder/features/home_screen/data/models/position_model.dart';
+import 'package:path_finder/features/processing/data/models/position_model.dart';
 
-import '../../features/home_screen/data/models/path_finding_request.dart';
+import '../../features/processing/data/models/path_finding_request.dart';
 
 class PathFindingService {
   List<Position> findPath(PathFindingRequest request) {

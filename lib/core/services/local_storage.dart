@@ -41,16 +41,4 @@ class SharedPreferencesService {
       return _prefs.getString(key) as T?;
     }
   }
-
-  Future<void> removeData(String key) async {
-    // _prefs = await SharedPreferences.getInstance();
-    await _prefs.remove(key);
-  }
-
-  //will be used for logout
-  Future<void> clearData() async {
-    _prefs = await SharedPreferences.getInstance();
-
-    await _prefs.clear();
-  }
 }

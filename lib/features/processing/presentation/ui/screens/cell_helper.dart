@@ -1,7 +1,7 @@
 // cell_helper.dart
 import 'package:flutter/material.dart';
-import 'package:path_finder/features/home_screen/data/models/cell_model.dart';
-import 'package:path_finder/features/home_screen/data/models/position_model.dart';
+import 'package:path_finder/features/processing/data/models/cell_model.dart';
+import 'package:path_finder/features/processing/data/models/position_model.dart';
 import 'package:path_finder/features/processing/data/models/shortest_path_result.dart';
 
 class CellHelper {

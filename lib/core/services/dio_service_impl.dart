@@ -1,3 +1,5 @@
+import 'dart:convert';
+
 import 'package:dartz/dartz.dart';
 import 'package:dio/dio.dart';
 import 'package:path_finder/core/error/http_failure.dart';
@@ -29,17 +31,17 @@ class DioServiceImpl implements HttpService {
   Future<Either<HttpFailure, T?>> post<T>({
     required String url,
     required T? Function(dynamic p1) fromJson,
-    Map<String, dynamic>? body,
+    dynamic body,
     void Function(int sent, int total)? onSendProgress,
   }) async {
     try {
       final response = await _dio.post(
         url,
         data: body,
-        onSendProgress: onSendProgress,
+        onSendProgress: (sent, total) {},
         options: Options(responseType: ResponseType.plain),
       );
-      return Right(fromJson(response.data));
+      return Right((fromJson(jsonDecode(response.data))));
     } catch (error) {
       return Left(errorFromDioError(error));
     }

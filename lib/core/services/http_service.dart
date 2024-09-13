@@ -10,6 +10,6 @@ abstract class HttpService {
   Future<Either<HttpFailure, T?>> post<T>({
     required String url,
     required T? Function(dynamic) fromJson,
-    Map<String, dynamic>? body,
+    dynamic body,
   });
 }
